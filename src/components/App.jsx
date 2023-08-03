@@ -1,99 +1,147 @@
-import { Component } from "react"
+import { useEffect, useState } from "react";
 import { fetchGallery } from "./http/fetch"
 import Notiflix from "notiflix";
 import { Searchbar } from "./Searchbar/Searchbar";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Button } from "./Button/Button";
 import { Loader } from "./Loader/Loader";
-import  Modal  from "./Modal/Modal"
+import  {Modal}  from "./Modal/Modal"
 
-export class App extends Component  {
-  state = {
-    isLoading: false,
-    page: 1,
-    keyword: "",
-    hits: [],
-    maxPage: 12,
-    hasMore: true,
-    largeImg: '',
-  }
-       
-  async componentDidUpdate(prevProps, prevState) {
-    const { keyword, page } = this.state;
+export const App = () => {
 
-    if (prevState.keyword !== keyword || prevState.page !== page) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [keyword, setKeyword] = useState('');
+  const [hits, setHits] = useState([]);
+  const [maxPage, setMaxPage] = useState(12);
+  const [hasMore, setHasMore] = useState(true);
+  const [largeImg, setLargeImg] = useState(''); 
+
+  // async componentDidUpdate(prevProps, prevState) {
+  //   const { keyword, page } = this.state;
+
+  //   if (prevState.keyword !== keyword || prevState.page !== page) {
+  //     try {
+  //       const result = await fetchGallery(keyword, page);
+  //       const hits = result.hits;
+
+  //       if (hits.length === 0) {
+  //         this.setState({ hasMore: false });
+  //           Notiflix.Notify.failure(
+  //           'Sorry, there are no images matching your search query. Please try again.');
+  //       }
+
+  //       this.setState((prevState) => ({
+  //         hits: [...prevState.hits, ...hits],
+  //       }));
+  //     } catch (error) {error} 
+  //        finally {
+  //       this.setState({ isLoading: false,});
+  //     }
+  //   }
+  // }
+//  useEffect(() => {
+//   const fetchGalleryFunction = asinc () => {
+//     setIsLoading(true)
+//     if (prevState.keyword !== keyword || prevState.page !== page) {
+//       try {
+//         const result = await fetchGallery(keyword, page);
+//         const hits = result.hits;
+
+//         if (hits.length === 0) {
+//           setHasMore(false)
+//             Notiflix.Notify.failure(
+//               'Sorry, there are no images matching your search query. Please try again.');
+//         }
+//       setHits(prevState => 
+//         [...prevState, ...hits])
+//     } catch (error) {
+//       console.log(error); 
+//     }
+//        finally {
+//         setIsLoading(false)
+//     }
+//   }
+// }
+// }, [hits, hasMore, isLoading])
+useEffect(() => {
+
+  const fetchGalleryFunction = async () => {
+    setIsLoading(true)
+
       try {
         const result = await fetchGallery(keyword, page);
         const hits = result.hits;
-
         if (hits.length === 0) {
-          this.setState({ hasMore: false });
+          setHasMore(false);
+          Notiflix.Notify.failure(
+            'Sorry, there are no images matching your search query. Please try again.'
+          );
         }
-
-        this.setState((prevState) => ({
-          hits: [...prevState.hits, ...hits],
-        }));
+        setHits(prevState => page === 1 ? hits : [...prevState, ...hits])
       } catch (error) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
+        console.log(error);
       } finally {
-        this.setState({ isLoading: false,});
+        setIsLoading(false);
       }
     }
+  if (keyword === '') {
+    return;
+  } else {
+    fetchGalleryFunction()
   }
+}, [keyword, page]);
 
-  onSubmit = async (keyword, page) => {
-    this.setState({
-      isLoading: true,
-      keyword,
-      page,
-      hits: [],
-      hasMore: true,
-    });
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const keyword = e.currentTarget.elements[1].value.trim();
+
+    setKeyword(keyword);
+    setPage(1);
+    setHits([])
+
+    e.currentTarget.reset();
   };
 
-  loadMore = () => {
-    const { page, maxPage } = this.state;
+  const loadMore = () => {
     if (page < maxPage) {
-      this.setState(
-        (prevState) => ({
-          isLoading: true,
-          page: prevState.page + 1,
-        }),
-      );
+      // this.setState(
+      //   (prevState) => ({
+      //     isLoading: true,
+      //     page: prevState.page + 1,
+      //   }),
+      // );
+      setIsLoading(true)
+      setPage(page + 1)
+
     } else {
-      this.setState({ hasMore: false, });
+      setHasMore(false)
     }
   }
   
 
-  openModal = (e) => {
+ const openModal = (e) => {
     const largeImg = e.currentTarget.getAttribute("data-large")
     console.log("test", largeImg);
-    this.setState({
-      largeImg,
-    });
+    setLargeImg(largeImg)
   }
-  onClose = () => {
-    this.setState({ largeImg: '' });
+ const onClose = () => {
+    setLargeImg('')
   }
 
-  render() {  
-    const {hits, hasMore, isLoading, largeImg} = this.state
     return (
       <>
-      <Searchbar onSubmit={this.onSubmit}/>
-      <ImageGallery hits={hits} openModal={this.openModal}/>
+      <Searchbar onSubmit={onSubmit}/>
+      <ImageGallery hits={hits} openModal={openModal}/>
       {isLoading ? 
         <Loader />
        : 
         <>
-          {hits.length > 0 && hasMore && <Button loadMore={this.loadMore} />}
-          {largeImg && <Modal largeImg={largeImg} onClose={this.onClose} />}
+          {hits.length > 0 && hasMore && <Button loadMore={loadMore} />}
+          {largeImg && <Modal largeImg={largeImg} onClose={onClose} />}
         </>
       }
     </>
     );
-  }
 };

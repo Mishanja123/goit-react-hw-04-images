@@ -25,18 +25,10 @@ export const Searchbar = ({onSubmit}) =>  {
     // handleChange = ({ target: { text, value } }) => {
     //     this.setState({ [text]: value });
     //   };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const keyword = e.currentTarget.elements[1].value.trim();
-        if (keyword === '') {
-          return;
-        }
-        onSubmit(keyword, 1);
-      };
 
     return(
         <header className={css.searchbar}>
-            <form className={css.form} onSubmit={handleSubmit}>
+            <form className={css.form} onSubmit={onSubmit}>
                  <button type="submit" className={css.button}>
                     <span className={css.buttonLabel}>&#128269;</span>
                 </button>
@@ -44,6 +36,7 @@ export const Searchbar = ({onSubmit}) =>  {
                 <input
                     className={css.input}
                     type="text"
+                    name='keyword'
                     autoComplete="off"
                     autoFocus
                     placeholder="Search images and photos"
