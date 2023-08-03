@@ -13,7 +13,6 @@ export const App = () => {
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
   const [hits, setHits] = useState([]);
-  const [maxPage, setMaxPage] = useState(12);
   const [hasMore, setHasMore] = useState(true);
   const [largeImg, setLargeImg] = useState(''); 
 
@@ -105,7 +104,7 @@ useEffect(() => {
   };
 
   const loadMore = () => {
-    if (page < maxPage) {
+    if (page < 12) {
       // this.setState(
       //   (prevState) => ({
       //     isLoading: true,
