@@ -15,6 +15,34 @@ export const App = () => {
   const [hits, setHits] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [largeImg, setLargeImg] = useState(''); 
+  
+  useEffect(() => {
+  
+    const fetchGalleryFunction = async () => {
+      setIsLoading(true)
+  
+        try {
+          const result = await fetchGallery(keyword, page);
+          const hits = result.hits;
+          if (hits.length === 0) {
+            setHasMore(false);
+            Notiflix.Notify.failure(
+              'Sorry, there are no images matching your search query. Please try again.'
+            );
+          }
+          setHits(prevState => page === 1 ? hits : [...prevState, ...hits])
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    if (keyword === '') {
+      return;
+    } else {
+      fetchGalleryFunction()
+    }
+  }, [keyword, page]);
 
   // async componentDidUpdate(prevProps, prevState) {
   //   const { keyword, page } = this.state;
@@ -63,33 +91,6 @@ export const App = () => {
 //   }
 // }
 // }, [hits, hasMore, isLoading])
-useEffect(() => {
-
-  const fetchGalleryFunction = async () => {
-    setIsLoading(true)
-
-      try {
-        const result = await fetchGallery(keyword, page);
-        const hits = result.hits;
-        if (hits.length === 0) {
-          setHasMore(false);
-          Notiflix.Notify.failure(
-            'Sorry, there are no images matching your search query. Please try again.'
-          );
-        }
-        setHits(prevState => page === 1 ? hits : [...prevState, ...hits])
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  if (keyword === '') {
-    return;
-  } else {
-    fetchGalleryFunction()
-  }
-}, [keyword, page]);
 
 
   const onSubmit = (e) => {
